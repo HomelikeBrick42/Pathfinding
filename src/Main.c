@@ -6,11 +6,19 @@
 
 #include <SDL.h>
 
+#define DIAGONAL 0
+
 typedef enum Direction {
     Direction_Up,
     Direction_Down,
     Direction_Left,
     Direction_Right,
+#if DIAGONAL
+    Direction_UpLeft,
+    Direction_UpRight,
+    Direction_DownLeft,
+    Direction_DownRight,
+#endif
     Direction_Count,
 } Direction;
 
@@ -99,33 +107,46 @@ void GridReset() {
             node->FCost  = 0;
             node->x      = x;
             node->y      = y;
-            if (y == 0) {
-                node->Neighbours[Direction_Down]  = &Grid.Nodes[x + (y + 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Left]  = &Grid.Nodes[(x - 1) + y * GRID_WIDTH];
-                node->Neighbours[Direction_Right] = &Grid.Nodes[(x + 1) + y * GRID_WIDTH];
-                node->Walkable                    = FALSE;
-            } else if (y == GRID_HEIGHT - 1) {
-                node->Neighbours[Direction_Up]    = &Grid.Nodes[x + (y - 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Left]  = &Grid.Nodes[(x - 1) + y * GRID_WIDTH];
-                node->Neighbours[Direction_Right] = &Grid.Nodes[(x + 1) + y * GRID_WIDTH];
-                node->Walkable                    = FALSE;
-            } else if (x == 0) {
-                node->Neighbours[Direction_Up]    = &Grid.Nodes[x + (y - 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Down]  = &Grid.Nodes[x + (y + 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Right] = &Grid.Nodes[(x + 1) + y * GRID_WIDTH];
-                node->Walkable                    = FALSE;
-            } else if (x == GRID_WIDTH - 1) {
-                node->Neighbours[Direction_Up]   = &Grid.Nodes[x + (y - 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Down] = &Grid.Nodes[x + (y + 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Left] = &Grid.Nodes[(x - 1) + y * GRID_WIDTH];
-                node->Walkable                   = FALSE;
+
+            if (y == 0 || y == GRID_HEIGHT - 1 || x == 0 || x == GRID_WIDTH - 1) {
+                node->Walkable = FALSE;
             } else {
-                node->Neighbours[Direction_Up]    = &Grid.Nodes[x + (y - 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Down]  = &Grid.Nodes[x + (y + 1) * GRID_WIDTH];
-                node->Neighbours[Direction_Left]  = &Grid.Nodes[(x - 1) + y * GRID_WIDTH];
-                node->Neighbours[Direction_Right] = &Grid.Nodes[(x + 1) + y * GRID_WIDTH];
-                node->Walkable                    = TRUE;
+                node->Walkable = TRUE;
             }
+
+            if (y > 0) {
+                node->Neighbours[Direction_Up] = &Grid.Nodes[(x + 0) + (y - 1) * GRID_WIDTH];
+            }
+
+            if (y < GRID_HEIGHT - 1) {
+                node->Neighbours[Direction_Down] = &Grid.Nodes[(x + 0) + (y + 1) * GRID_WIDTH];
+            }
+
+            if (x > 0) {
+                node->Neighbours[Direction_Left] = &Grid.Nodes[(x - 1) + (y + 0) * GRID_WIDTH];
+            }
+
+            if (x < GRID_WIDTH - 1) {
+                node->Neighbours[Direction_Right] = &Grid.Nodes[(x + 1) + (y + 0) * GRID_WIDTH];
+            }
+
+#if DIAGONAL
+            if (y > 0 && x > 0) {
+                node->Neighbours[Direction_UpLeft] = &Grid.Nodes[(x - 1) + (y - 1) * GRID_WIDTH];
+            }
+
+            if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {
+                node->Neighbours[Direction_DownRight] = &Grid.Nodes[(x + 1) + (y + 1) * GRID_WIDTH];
+            }
+
+            if (x > 0 && y < GRID_HEIGHT - 1) {
+                node->Neighbours[Direction_DownLeft] = &Grid.Nodes[(x - 1) + (y + 1) * GRID_WIDTH];
+            }
+
+            if (x < GRID_WIDTH - 1 && y > 0) {
+                node->Neighbours[Direction_UpRight] = &Grid.Nodes[(x + 1) + (y - 1) * GRID_WIDTH];
+            }
+#endif
         }
     }
 }

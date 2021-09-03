@@ -9,6 +9,10 @@ set(SDL2_LIB_DIR C:/Dev/SDL/lib/x64)
 include_directories(${SDL2_INCLUDE_DIR})
 link_directories(${SDL2_LIB_DIR})
 
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+    add_compile_options(-O3)
+endif()
+
 include_directories(src)
 add_executable(Pathfinding src/Main.c src/Typedefs.h)
 
